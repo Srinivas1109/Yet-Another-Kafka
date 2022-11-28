@@ -1,5 +1,8 @@
 import threading, socket, json
-from utils import checkTopics
+from utils import checkTopics, createTopic
+
+# on failure of existing leader change leader name
+leader = "Broker1"
 
 # With thread1
 def Broker1():
@@ -13,7 +16,15 @@ def Broker1():
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
         clientRes = json.loads(client.recv(1024).decode())
-        print(clientRes, type(clientRes))
+        if clientRes["isProducer"]:
+            if clientRes["topicName"] not in checkTopics()[0] and clientRes["topicName"] not in checkTopics()[1] and clientRes["topicName"] not in checkTopics()[2]:
+                # create new topic
+                createTopic(clientRes["topicName"], leader)
+                print("Topic Created Successfully....")
+            else:
+                # append data to existing topic
+                pass
+        print(clientRes, )
         client.send("Hello from broker1".encode())
         client.close()
 
@@ -29,7 +40,15 @@ def Broker2():
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
         clientRes = json.loads(client.recv(1024).decode())
-        print(clientRes, type(clientRes))
+        if clientRes["isProducer"]:
+            if clientRes["topicName"] not in checkTopics()[0] and clientRes["topicName"] not in checkTopics()[1] and clientRes["topicName"] not in checkTopics()[2]:
+                # create new topic
+                createTopic(clientRes["topicName"], leader)
+                print("Topic Created Successfully....")
+            else:
+                # append data to existing topic
+                pass
+        print(clientRes, )
         client.send("Hello from broker2".encode())
         client.close()
 
@@ -45,7 +64,15 @@ def Broker3():
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
         clientRes = json.loads(client.recv(1024).decode())
-        print(clientRes, type(clientRes))
+        if clientRes["isProducer"]:
+            if clientRes["topicName"] not in checkTopics()[0] and clientRes["topicName"] not in checkTopics()[1] and clientRes["topicName"] not in checkTopics()[2]:
+                # create new topic
+                createTopic(clientRes["topicName"], leader)
+                print("Topic Created Successfully....")
+            else:
+                # append data to existing topic
+                pass
+        print(clientRes, )
         client.send("Hello from broker3".encode())
         client.close()
 

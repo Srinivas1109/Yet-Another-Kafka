@@ -6,8 +6,9 @@ c = socket.socket()
 isProducer = True
 c.connect(('localhost', brokerPorts[random.randint(0, len(brokerPorts)-1)]))
 topicName = input("Enter topic name: ")
+
 producerData = {
-    "data": topicName,
+    "topicName": topicName,
     "isProducer": isProducer
 }
 
