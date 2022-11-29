@@ -1,4 +1,5 @@
-import subprocess
+import subprocess, shutil
+from os import path
 
 def checkTopics():
     # cmd = ["ls"]
@@ -17,16 +18,34 @@ def createTopic(topicName, leader):
     p = subprocess.Popen(f"mkdir {leader}/{topicName}", shell= True)
     p.communicate()
 
+def deleteTopic(source):
+    shutil.rmtree(source)
+
 # checkTopics()
 # createTopic("TestTpoic")
 # /home/pes1ug20cs517/BD-project/producerData.txt
 
-def writeMessages(broker, filepath):
-    filedata = open(filepath, "r")
-    lines = filedata.readlines()
-    print(lines)
+def hash():
+    pass
+
+def replicatePartitions(broker, topicName):
+    BASE_DIR = path.dirname(__file__)
+    existingTopics = checkTopics()
+    if topicName in existingTopics[broker-1]:
+        source = BASE_DIR + f"/Broker{broker}/" + topicName
+        deleteTopic(source)
+    SOURCE = BASE_DIR + "/Broker1/" + topicName
+    DESTINATION = BASE_DIR + f"/Broker{broker}/" + topicName
+    shutil.copytree(SOURCE, DESTINATION)
+
+def replicate(topicName):
+    # print(BASE_DIR)
+    for broker in [2, 3]:
+        replicatePartitions(broker, topicName)
 
 def createPartitions(topicName, partitionName):
     print(topicName, partitionName)
     p = subprocess.Popen(f"mkdir Broker1/{topicName}/{partitionName}", shell= True)
     p.communicate()
+
+# replicate("Cricket")
