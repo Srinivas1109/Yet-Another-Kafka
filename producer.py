@@ -6,12 +6,24 @@ c = socket.socket()
 isProducer = True
 c.connect(('localhost', brokerPorts[random.randint(0, len(brokerPorts)-1)]))
 topicName = input("Enter topic name: ")
+noOfPartitions = int(input("Enter no. of partitions: "))
 
 producerData = {
     "topicName": topicName,
-    "isProducer": isProducer
+    "isProducer": isProducer,
+    "noOfPartitions": noOfPartitions
 }
 
 c.send(json.dumps(producerData).encode())
-
 print(c.recv(1024).decode())
+
+filePath = input("Enter absolute filepath: ")
+file = open(filePath, "r")
+
+for line in file.readlines():
+    c.send(line.encode())
+
+c.send("stop".encode())
+
+
+

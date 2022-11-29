@@ -19,3 +19,14 @@ def createTopic(topicName, leader):
 
 # checkTopics()
 # createTopic("TestTpoic")
+# /home/pes1ug20cs517/BD-project/producerData.txt
+
+def writeMessages(broker, filepath):
+    filedata = open(filepath, "r")
+    lines = filedata.readlines()
+    print(lines)
+
+def createPartitions(topicName, partitionName):
+    print(topicName, partitionName)
+    p = subprocess.Popen(f"mkdir Broker1/{topicName}/{partitionName}", shell= True)
+    p.communicate()
