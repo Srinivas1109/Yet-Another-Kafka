@@ -17,6 +17,7 @@ producerData = {
 c.send(json.dumps(producerData).encode())
 print(c.recv(1024).decode())
 
+# /home/pes1ug20cs517/BD-project/producerData.txt
 filePath = input("Enter absolute filepath: ")
 file = open(filePath, "r")
 

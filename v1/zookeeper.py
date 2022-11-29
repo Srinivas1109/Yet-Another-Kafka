@@ -14,7 +14,7 @@ def Broker(client):
             # print("Topic Created Successfully....")
 
             for i in range(clientRes["noOfPartitions"]):
-                print(i)
+                # print(i)
                 createPartitions(clientRes["topicName"], str(i))
                 # create subfolders as partions
 
@@ -90,6 +90,7 @@ while True:
 
     if not broker3.is_alive():
         print("Broker3 is Dead")
+        
     time.sleep(1)
 
 

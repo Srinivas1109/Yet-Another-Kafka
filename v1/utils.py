@@ -9,8 +9,8 @@ def checkTopics():
         topics, err = sp.communicate()
         # print(topics.splitlines())
         existingTopics.append(topics.splitlines())
-        print(err)
-    print(existingTopics)
+        print("ERROR in CheckTopics",err)
+    # print(existingTopics)
     return existingTopics
 
 def createTopic(topicName, leader):
@@ -23,7 +23,7 @@ def deleteTopic(source):
 
 # checkTopics()
 # createTopic("TestTpoic")
-# /home/pes1ug20cs517/BD-project/producerData.txt
+# /home/pes1ug20cs517/BD-project/v1/producerData.txt
 
 def hash():
     pass
