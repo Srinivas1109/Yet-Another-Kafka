@@ -6,22 +6,25 @@ BROKER_PORTS = [5000, 5001, 5002]
 def Broker(client, broker):
     clientRes = json.loads(client.recv(1024).decode())
     if clientRes["isProducer"]:
-        createPartitions(clientRes["topicName"], clientRes["noOfPartitions"])
-
-        client.send(f"Topic and Partitions created succcessfully...".encode())
-        clientData = client.recv(1024).decode()
-
+        res = createPartitions(clientRes["topicName"], clientRes["noOfPartitions"])
+        if res:
+            client.send(f"Topic and Partitions created succcessfully...".encode())
+            clientData = client.recv(1024).decode()
         
-        while clientData and clientData.lower() != "agsv11":
-            # print(clientData)
-            # Write message to the partition
-            writeMessages(clientRes["topicName"], broker, clientData)
-            time.sleep(1)
-            clientData = client.recv(1024*5).decode()
-            
-        
+            while clientData and clientData.lower() != "agsv11":
+                # print(clientData)
+                # Write message to the partition
+                writeMessages(clientRes["topicName"], broker, clientData)
+                time.sleep(1)
+                clientData = client.recv(1024*5).decode()
+        else:
+            client.send(f"Topic already exists...".encode())
+
         client.close()
-
+    elif not client["isProducer"]:
+        # read topic
+        # read from beginning
+        readFromBeginning()
 
 # With thread1
 def Broker1():

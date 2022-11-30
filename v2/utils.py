@@ -25,6 +25,13 @@ log = {
 }
 
 """
+def getBrokerWithPartitionNum(selectedTopic, partitionNo):
+    if partitionNo in selectedTopic["Broker1"]:
+        return "Broker1"
+    elif partitionNo in selectedTopic["Broker2"]:
+        return "Broker2"
+    elif partitionNo in selectedTopic["Broker3"]:
+        return "Broker3"
 
 def createFile(filepath, data):
     with open( filepath + str(getPreviousOffset(filepath)), "w") as file:
@@ -88,7 +95,8 @@ def createPartitions(topicName, nPartitions):
             json.dump(logdata, file, indent= 4)
             # print(logdata)
         else:
-            print("Topic already exists....!")
+            return False
+        return True
 
 def writeMessages(topicName, broker, data):
     logdata = None
@@ -147,6 +155,40 @@ def writeMessages(topicName, broker, data):
     with open("zoolog.json", "w") as newfile:
         json.dump(logdata, newfile, indent= 4)
         
+def readFromBeginning(topicName, broker):
+    logdata = None
+    with open("zoolog.json", "r") as file:
+        logdata = json.load(file)
+
+    selectedTopic = list(filter(lambda topics: list(topics.keys())[0] == topicName, logdata))[0]
+    # print(selectedTopic)
+    startPartition = selectedTopic[topicName]["start"]
+    endPartition = selectedTopic[topicName]["end"]
+    nPartitions = selectedTopic[topicName]["nPartitions"]
+    # print(stratPartition, nPartitions)
+
+    readpath = BASE_DIR + "/" + getBrokerWithPartitionNum(selectedTopic[topicName], startPartition)+ f"/{topicName}/"  + f"/{startPartition}/" + f"0"
+
+    with open(readpath) as file:
+        print(file.readline())
+
+readFromBeginning("Football", "Broker2")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # createPartitions("Cricket", 10)

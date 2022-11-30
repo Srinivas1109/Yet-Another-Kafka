@@ -16,7 +16,7 @@ producerData = {
 
 c.send(json.dumps(producerData).encode())
 
-print(c.recv(1024).decode())
+res = c.recv(1024).decode()
 
 # /home/pes1ug20cs517/BD-project/producerData.txt
 # filePath = input("Enter absolute filepath: ")
@@ -25,12 +25,13 @@ print(c.recv(1024).decode())
 # for line in file.readlines():
 #     c.send(line.encode())
 # c.send(file.readlines()[0].encode())
-
-data = input("Enter data: ")
-
-while data != "stop":
-    c.send(data.encode())
+print(res)
+if res not in "Topic already exists...":
     data = input("Enter data: ")
 
+    while data != "stop":
+        c.send(data.encode())
+        data = input("Enter data: ")
 
-c.send("agsv11".encode())
+
+    c.send("agsv11".encode())
