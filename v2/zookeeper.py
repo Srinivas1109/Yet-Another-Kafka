@@ -3,7 +3,7 @@ from utils import *
 
 BROKER_PORTS = [5000, 5001, 5002]
 
-def Broker(client, broker):
+def Broker(client, broker, clientPort):
     clientRes = json.loads(client.recv(1024).decode())
     if clientRes["isProducer"]:
         res = createPartitions(clientRes["topicName"], clientRes["noOfPartitions"])
@@ -21,10 +21,11 @@ def Broker(client, broker):
             client.send(f"Topic already exists...".encode())
 
         client.close()
-    elif not client["isProducer"]:
+    elif not clientRes["isProducer"]:
         # read topic
         # read from beginning
-        readFromBeginning()
+        readFromBeginning(clientRes["topicName"], clientPort, client)
+        # client.close()
 
 # With thread1
 def Broker1():
@@ -37,7 +38,8 @@ def Broker1():
     while True:
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
-        Broker(client, "Broker1")
+        Broker(client, "Broker1", addr[1])
+
         
 
 
@@ -53,7 +55,8 @@ def Broker2():
     while True:
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
-        Broker(client, "Broker2")
+
+        Broker(client, "Broker2", addr[1])
 
 # With thread3
 def Broker3():
@@ -66,7 +69,8 @@ def Broker3():
     while True:
         client, addr = broker1Socket.accept()
         print("Connected With ", addr)
-        Broker(client, "Broker3")
+        
+        Broker(client, "Broker3", addr[1])
 
 print("Creating Brokers....")
 

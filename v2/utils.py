@@ -1,6 +1,8 @@
 # from zookeeper import BROKER_PORTS
 import json, subprocess, shutil
 from os import path
+import os
+import glob
 
 BROKER_PORTS = [5000, 5001, 5002]
 
@@ -25,6 +27,17 @@ log = {
 }
 
 """
+def deleteTempFiles(portNo):
+    pattern = BASE_DIR + f"/**/{portNo}.temp"
+    # pattern = BASE_DIR + f"/**/*.temp"
+
+    # print(pattern)
+    files = list(glob.iglob(pattern, recursive= True))
+    # print(files)
+    for i in files:
+        # print(i)
+        os.remove(i)
+
 def getBrokerWithPartitionNum(selectedTopic, partitionNo):
     if partitionNo in selectedTopic["Broker1"]:
         return "Broker1"
@@ -155,7 +168,15 @@ def writeMessages(topicName, broker, data):
     with open("zoolog.json", "w") as newfile:
         json.dump(logdata, newfile, indent= 4)
         
-def readFromBeginning(topicName, broker):
+def fileExists(dir, filename):
+    sp = subprocess.Popen(["ls", dir], shell= False, stdout= subprocess.PIPE, stderr= subprocess.PIPE, universal_newlines= True)
+    files, err = sp.communicate()
+    # print(files)
+    if filename in files.splitlines():
+        return True
+    return False
+
+def readFromBeginning(topicName, consumerPort, client):
     logdata = None
     with open("zoolog.json", "r") as file:
         logdata = json.load(file)
@@ -167,13 +188,68 @@ def readFromBeginning(topicName, broker):
     nPartitions = selectedTopic[topicName]["nPartitions"]
     # print(stratPartition, nPartitions)
 
-    readpath = BASE_DIR + "/" + getBrokerWithPartitionNum(selectedTopic[topicName], startPartition)+ f"/{topicName}/"  + f"/{startPartition}/" + f"0"
+    # loop
+    # dataFile = 0
+    while True:
+        checkFilePath = BASE_DIR + "/" + getBrokerWithPartitionNum(selectedTopic[topicName], startPartition)+ f"/{topicName}"  + f"/{startPartition}/"
 
-    with open(readpath) as file:
-        print(file.readline())
+        if not fileExists(checkFilePath, str(consumerPort) + ".temp"):
+            # print("Creating new file")
+            with open( checkFilePath + str(consumerPort) + ".temp", "w") as file:
+                file.write(json.dumps({"lastRead": -1}))
+                file.close()
+        
+        lastReadFile = open(checkFilePath + str(consumerPort) + ".temp", "r")
+        lastRead = json.loads(lastReadFile.readline())
+        lastReadFile.close()
+        # print(type(lastRead["lastRead"]))
+        readpath = checkFilePath + f"{ lastRead['lastRead'] + 1}"
+        # print(readpath)
 
-readFromBeginning("Football", "Broker2")
+        sp = subprocess.Popen(["ls", checkFilePath], shell= False, stdout= subprocess.PIPE, stderr= subprocess.PIPE, universal_newlines= True)
+        files, err = sp.communicate()
+        files = files.splitlines()
+        reqFiles = list(filter(lambda x : ".temp" not in x, files))
+        lastFile = reqFiles[-1]
 
+        with open(readpath) as file:
+            
+            data = file.readline()
+            # print(data)
+            client.send(data.encode())
+            file.close()
+            # pass
+
+        if startPartition == endPartition and str(lastRead["lastRead"] + 1) == lastFile:
+            break
+
+        lastReadFile = open(checkFilePath + str(consumerPort) + ".temp", "w")
+        # print("lastRead: ", lastRead['lastRead'])
+        lastReadFile.write(json.dumps({"lastRead": lastRead['lastRead'] + 1}))
+        lastReadFile.close()
+        
+        startPartition = (startPartition + 1) % nPartitions
+    client.send("agsv11".encode())
+    client.close()
+    deleteTempFiles(consumerPort)
+    
+
+# readFromBeginning("Football", 1234, "client")
+# lastReadFile = open("/home/pes1ug20cs517/BD-project/v2/Broker2/Football/1/" + str(1234) + ".temp", "w")
+# lastReadFile.write(json.dumps({"lastRead": 2 + 1}))
+# lastReadFile.close()
+# lastRead = open("/home/pes1ug20cs517/BD-project/v2/Broker2/Football/1/" + str(1234) + ".temp", "r").readline()
+# print(lastRead, type(lastRead), type(json.loads(lastRead)))
+
+
+# sp = subprocess.Popen(["ls", "/home/pes1ug20cs517/BD-project/v2/Broker2/Football/1/"], shell= False, stdout= subprocess.PIPE, stderr= subprocess.PIPE, universal_newlines= True)
+# files, err = sp.communicate()
+# files = files.splitlines()
+# print(files)
+# reqFiles = list(filter(lambda x : ".temp" not in x, files))
+# print(reqFiles)
+# lastFile = reqFiles[-1]
+# print(lastFile)
 
 
 
@@ -228,3 +304,5 @@ def testData():
 # test()
 
 # /home/pes1ug20cs517/BD-project/v1/producerData.txt
+
+deleteTempFiles(40058)
